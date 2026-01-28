@@ -1,0 +1,65 @@
+version: '3.8'
+
+services:
+  # Servicio 1: Base de datos MySQL
+  db:
+    image: mysql:8.0
+    container_name: task_database
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: ${DB_PASSWORD}
+      MYSQL_DATABASE: ${DB_NAME}
+      MYSQL_USER: ${DB_USER}
+      MYSQL_PASSWORD: ${DB_PASSWORD}
+    volumes:
+      - mysql_data:/var/lib/mysql
+    networks:
+      - task_network
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-p${DB_PASSWORD}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # Servicio 2: API Flask
+  api:
+    build: ./api
+    container_name: task_api
+    restart: always
+    ports:
+      - "5000:5000"
+    environment:
+      DB_USER: ${DB_USER}
+      DB_PASSWORD: ${DB_PASSWORD}
+      DB_HOST: db
+      DB_PORT: 3306
+      DB_NAME: ${DB_NAME}
+    depends_on:
+      db:
+        condition: service_healthy
+    networks:
+      - task_network
+    volumes:
+      - ./api:/app
+
+  # Servicio 3: Frontend con Nginx
+  frontend:
+    build: ./frontend
+    container_name: task_frontend
+    restart: always
+    ports:
+      - "8080:80"
+    depends_on:
+      - api
+    networks:
+      - task_network
+
+# Red personalizada
+networks:
+  task_network:
+    driver: bridge
+
+# Volumen para persistencia
+volumes:
+  mysql_data:
+    driver: local

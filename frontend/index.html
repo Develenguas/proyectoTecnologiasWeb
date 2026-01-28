@@ -1,0 +1,554 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>Task Manager API - Cliente</title>
+  <style>
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      font-size: 14px;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: #333;
+      padding: 20px;
+      margin: 0;
+    }
+
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+
+    h1 {
+      color: #fff;
+      text-align: center;
+      margin-bottom: 10px;
+      font-size: 2.5em;
+      text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+    }
+
+    .subtitle {
+      color: #fff;
+      text-align: center;
+      margin-bottom: 30px;
+      opacity: 0.9;
+    }
+
+    .methods {
+      background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
+      color: #fff;
+      padding: 20px;
+      border-radius: 10px;
+      margin-bottom: 20px;
+      box-shadow: 0 4px 6px rgba(0,0,0,0.2);
+    }
+
+    .methods h2 {
+      margin-top: 0;
+      margin-bottom: 15px;
+      font-size: 1.3em;
+    }
+
+    .endpoint {
+      display: flex;
+      align-items: center;
+      margin: 10px 0;
+      padding: 10px;
+      background: rgba(255,255,255,0.1);
+      border-radius: 5px;
+      border-left: 4px solid;
+    }
+
+    .endpoint.get {
+      border-left-color: #4CAF50;
+    }
+
+    .endpoint.post {
+      border-left-color: #2196F3;
+    }
+
+    .endpoint.put {
+      border-left-color: #FF9800;
+    }
+
+    .endpoint.delete {
+      border-left-color: #f44336;
+    }
+
+    .method-badge {
+      display: inline-block;
+      padding: 4px 10px;
+      border-radius: 4px;
+      font-weight: bold;
+      font-size: 12px;
+      margin-right: 12px;
+      min-width: 60px;
+      text-align: center;
+    }
+
+    .method-badge.get {
+      background: #4CAF50;
+      color: white;
+    }
+
+    .method-badge.post {
+      background: #2196F3;
+      color: white;
+    }
+
+    .method-badge.put {
+      background: #FF9800;
+      color: white;
+    }
+
+    .method-badge.delete {
+      background: #f44336;
+      color: white;
+    }
+
+    .endpoint-path {
+      font-family: 'Courier New', monospace;
+      font-size: 14px;
+    }
+
+    section {
+      background: #ffffff;
+      border-radius: 10px;
+      padding: 20px;
+      margin-bottom: 20px;
+      box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+    }
+
+    section h2 {
+      margin-top: 0;
+      margin-bottom: 15px;
+      color: #667eea;
+      border-bottom: 2px solid #667eea;
+      padding-bottom: 8px;
+    }
+
+    label {
+      display: block;
+      margin-top: 12px;
+      font-weight: 600;
+      color: #555;
+    }
+
+    input, textarea, select {
+      width: 100%;
+      margin-top: 6px;
+      padding: 10px;
+      font-size: 14px;
+      border: 2px solid #e0e0e0;
+      border-radius: 5px;
+      transition: border-color 0.3s;
+    }
+
+    input:focus, textarea:focus, select:focus {
+      outline: none;
+      border-color: #667eea;
+    }
+
+    textarea {
+      resize: vertical;
+      min-height: 80px;
+    }
+
+    button {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+      border: none;
+      padding: 12px 24px;
+      font-size: 14px;
+      font-weight: 600;
+      border-radius: 5px;
+      cursor: pointer;
+      margin-top: 15px;
+      transition: transform 0.2s, box-shadow 0.2s;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+    }
+
+    button:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 8px rgba(0,0,0,0.3);
+    }
+
+    button:active {
+      transform: translateY(0);
+    }
+
+    .task {
+      border: 1px solid #e0e0e0;
+      border-radius: 5px;
+      padding: 12px;
+      margin-top: 10px;
+      background: #f9f9f9;
+      transition: background 0.2s;
+    }
+
+    .task:hover {
+      background: #f0f0f0;
+    }
+
+    .task-id {
+      display: inline-block;
+      background: #667eea;
+      color: white;
+      padding: 2px 8px;
+      border-radius: 3px;
+      font-weight: bold;
+      font-size: 12px;
+      margin-right: 8px;
+    }
+
+    .task-title {
+      font-weight: 600;
+      color: #333;
+      margin-right: 10px;
+    }
+
+    .task-status {
+      display: inline-block;
+      padding: 2px 8px;
+      border-radius: 3px;
+      font-size: 12px;
+      font-weight: 600;
+    }
+
+    .task-status.completed {
+      background: #4CAF50;
+      color: white;
+    }
+
+    .task-status.pending {
+      background: #FF9800;
+      color: white;
+    }
+
+    .log {
+      background: #1e1e1e;
+      color: #00ff00;
+      font-family: 'Courier New', monospace;
+      font-size: 12px;
+      padding: 15px;
+      height: 200px;
+      overflow-y: auto;
+      border-radius: 5px;
+      line-height: 1.5;
+    }
+
+    .log-entry {
+      margin-bottom: 5px;
+    }
+
+    .grid-2 {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 20px;
+    }
+
+    @media (max-width: 768px) {
+      .grid-2 {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .no-results {
+      text-align: center;
+      padding: 20px;
+      color: #999;
+      font-style: italic;
+    }
+  </style>
+</head>
+<body>
+
+<div class="container">
+  <h1>📋 Task Manager API</h1>
+  <p class="subtitle">Cliente HTML para consumo de API REST</p>
+
+  <div class="methods">
+    <h2>🔌 Endpoints Disponibles</h2>
+    <div class="endpoint get">
+      <span class="method-badge get">GET</span>
+      <span class="endpoint-path">/tasks</span>
+      <span style="margin-left: auto; opacity: 0.8;">Listar todas las tareas</span>
+    </div>
+    <div class="endpoint get">
+      <span class="method-badge get">GET</span>
+      <span class="endpoint-path">/tasks/:id</span>
+      <span style="margin-left: auto; opacity: 0.8;">Obtener tarea por ID</span>
+    </div>
+    <div class="endpoint post">
+      <span class="method-badge post">POST</span>
+      <span class="endpoint-path">/tasks</span>
+      <span style="margin-left: auto; opacity: 0.8;">Crear nueva tarea</span>
+    </div>
+    <div class="endpoint put">
+      <span class="method-badge put">PUT</span>
+      <span class="endpoint-path">/tasks/:id</span>
+      <span style="margin-left: auto; opacity: 0.8;">Actualizar tarea</span>
+    </div>
+    <div class="endpoint delete">
+      <span class="method-badge delete">DELETE</span>
+      <span class="endpoint-path">/tasks/:id</span>
+      <span style="margin-left: auto; opacity: 0.8;">Eliminar tarea</span>
+    </div>
+  </div>
+
+  <div class="grid-2">
+    <section>
+      <h2>📝 POST /tasks - Crear Tarea</h2>
+
+      <label>Título</label>
+      <input type="text" id="title" placeholder="Ej: Completar proyecto">
+
+      <label>Descripción</label>
+      <textarea id="description" placeholder="Describe la tarea..."></textarea>
+
+      <label>Prioridad</label>
+      <select id="priority">
+        <option value="baja">Baja</option>
+        <option value="media" selected>Media</option>
+        <option value="alta">Alta</option>
+      </select>
+
+      <button onclick="createTask()">✨ Crear tarea</button>
+    </section>
+
+    <section>
+      <h2>🔍 GET /tasks/:id - Obtener por ID</h2>
+
+      <label>ID de la tarea</label>
+      <input type="number" id="getId" placeholder="Ej: 1" min="1">
+
+      <button onclick="getTaskById()">🔎 Buscar tarea</button>
+
+      <div id="taskDetail"></div>
+    </section>
+  </div>
+
+  <section>
+    <h2>📋 GET /tasks - Listar Tareas</h2>
+
+    <div class="grid-2">
+      <div>
+        <label>Filtrar por estado (completed)</label>
+        <select id="filterCompleted">
+          <option value="">(Sin filtro)</option>
+          <option value="true">Completadas</option>
+          <option value="false">Pendientes</option>
+        </select>
+      </div>
+
+      <div>
+        <label>Filtrar por prioridad</label>
+        <select id="filterPriority">
+          <option value="">(Sin filtro)</option>
+          <option value="alta">Alta</option>
+          <option value="media">Media</option>
+          <option value="baja">Baja</option>
+        </select>
+      </div>
+    </div>
+
+    <button onclick="loadTasks()">🔄 Cargar tareas</button>
+
+    <div id="taskList"></div>
+  </section>
+
+  <div class="grid-2">
+    <section>
+      <h2>✏️ PUT /tasks/:id - Actualizar</h2>
+
+      <label>ID de la tarea</label>
+      <input type="number" id="putId" placeholder="Ej: 1" min="1">
+
+      <label>Estado (completed)</label>
+      <select id="putCompleted">
+        <option value="false">Pendiente</option>
+        <option value="true">Completada</option>
+      </select>
+
+      <button onclick="updateTask()">💾 Actualizar tarea</button>
+    </section>
+
+    <section>
+      <h2>🗑️ DELETE /tasks/:id - Eliminar</h2>
+
+      <label>ID de la tarea</label>
+      <input type="number" id="deleteId" placeholder="Ej: 1" min="1">
+
+      <button onclick="deleteTask()">❌ Eliminar tarea</button>
+    </section>
+  </div>
+
+  <section>
+    <h2>📊 Log de Respuestas (JSON)</h2>
+    <div id="log" class="log"></div>
+  </section>
+</div>
+
+<script>
+  const API_URL = 'http://localhost:5000/api';
+
+  function log(msg) {
+    const logDiv = document.getElementById('log');
+    const timestamp = new Date().toLocaleTimeString();
+    logDiv.innerHTML += `<div class="log-entry">[${timestamp}] ${msg}</div>`;
+    logDiv.scrollTop = logDiv.scrollHeight;
+  }
+
+  async function createTask() {
+    try {
+      const res = await fetch(`${API_URL}/tasks`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          title: title.value,
+          description: description.value,
+          priority: priority.value,
+          completed: false
+        })
+      });
+      const data = await res.json();
+      log('POST /tasks → ' + JSON.stringify(data));
+      
+      // Limpiar campos
+      title.value = '';
+      description.value = '';
+      priority.value = 'media';
+    } catch (error) {
+      log('ERROR: ' + error.message);
+    }
+  }
+
+  async function getTaskById() {
+    try {
+      const id = getId.value;
+      if (!id) {
+        alert('Por favor ingresa un ID');
+        return;
+      }
+
+      const res = await fetch(`${API_URL}/tasks/${id}`);
+      const data = await res.json();
+      log('GET /tasks/' + id + ' → ' + JSON.stringify(data));
+
+      const detail = document.getElementById('taskDetail');
+      
+      if (res.status === 404 || data.error) {
+        detail.innerHTML = '<p class="no-results">❌ Tarea no encontrada</p>';
+        return;
+      }
+
+      const task = data.task || data;
+      detail.innerHTML = `
+        <div class="task" style="margin-top: 15px;">
+          <div>
+            <span class="task-id">ID: ${task.id}</span>
+            <span class="task-status ${task.completed ? 'completed' : 'pending'}">
+              ${task.completed ? '✅ Completada' : '⏳ Pendiente'}
+            </span>
+          </div>
+          <div style="margin-top: 8px;">
+            <strong>${task.title}</strong>
+          </div>
+          <div style="margin-top: 5px; color: #666;">
+            ${task.description || 'Sin descripción'}
+          </div>
+          <div style="margin-top: 5px; font-size: 12px; color: #999;">
+            Prioridad: <strong>${task.priority || 'media'}</strong>
+          </div>
+        </div>
+      `;
+    } catch (error) {
+      log('ERROR: ' + error.message);
+    }
+  }
+
+  async function loadTasks() {
+    try {
+      let url = `${API_URL}/tasks?`;
+      if (filterCompleted.value) url += `completed=${filterCompleted.value}&`;
+      if (filterPriority.value) url += `priority=${filterPriority.value}`;
+
+      const res = await fetch(url);
+      const data = await res.json();
+      log('GET /tasks → ' + JSON.stringify(data));
+
+      const list = document.getElementById('taskList');
+      list.innerHTML = '';
+
+      if (!data.tasks || data.tasks.length === 0) {
+        list.innerHTML = '<p class="no-results">📭 No hay tareas que coincidan con los filtros</p>';
+        return;
+      }
+
+      data.tasks.forEach(t => {
+        list.innerHTML += `
+          <div class="task">
+            <span class="task-id">ID: ${t.id}</span>
+            <span class="task-title">${t.title}</span>
+            <span class="task-status ${t.completed ? 'completed' : 'pending'}">
+              ${t.completed ? '✅ Completada' : '⏳ Pendiente'}
+            </span>
+            <div style="margin-top: 5px; color: #666; font-size: 12px;">
+              ${t.description || 'Sin descripción'} | Prioridad: ${t.priority || 'media'}
+            </div>
+          </div>
+        `;
+      });
+    } catch (error) {
+      log('ERROR: ' + error.message);
+    }
+  }
+
+  async function updateTask() {
+    try {
+      const id = putId.value;
+      if (!id) {
+        alert('Por favor ingresa un ID');
+        return;
+      }
+
+      const res = await fetch(`${API_URL}/tasks/${id}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ completed: putCompleted.value === 'true' })
+      });
+      const data = await res.json();
+      log('PUT /tasks/' + id + ' → ' + JSON.stringify(data));
+    } catch (error) {
+      log('ERROR: ' + error.message);
+    }
+  }
+
+  async function deleteTask() {
+    try {
+      const id = deleteId.value;
+      if (!id) {
+        alert('Por favor ingresa un ID');
+        return;
+      }
+
+      if (!confirm('¿Estás seguro de eliminar esta tarea?')) {
+        return;
+      }
+
+      const res = await fetch(`${API_URL}/tasks/${id}`, {
+        method: 'DELETE'
+      });
+      const data = await res.json();
+      log('DELETE /tasks/' + id + ' → ' + JSON.stringify(data));
+    } catch (error) {
+      log('ERROR: ' + error.message);
+    }
+  }
+</script>
+
+</body>
+</html>
