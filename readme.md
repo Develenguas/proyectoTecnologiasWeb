@@ -106,7 +106,7 @@ curl -X PUT http://localhost:5000/api/tasks/1 \
 
 ## 📄 Licencia y Derechos de Autor
 
-Copyright © 2024 [Tu Nombre]
+Copyright © 2024 Salvador
 
 Este proyecto está bajo la **Licencia MIT**. Consulta el archivo LICENSE para más detalles.
 
